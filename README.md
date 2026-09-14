@@ -1,66 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ⚽ Maaafiqs Mini Soccer - Sistem Reservasi & Manajemen Lapangan
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/images/hero_pitch_night.jpg" width="850" alt="Maaafiqs Mini Soccer Arena" style="border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);" />
 </p>
 
-## About Laravel
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+  <img src="https://img.shields.io/badge/PHP-^8.1-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Alpine.js-3.x-8BC0D0?style=for-the-badge&logo=alpine.js&logoColor=white" alt="Alpine.js" />
+  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🌟 Tentang Proyek
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Maaafiqs Mini Soccer** adalah aplikasi web modern berbasis **Laravel 10** yang dirancang untuk mengelola pemesanan lapangan sepak bola mini (*mini soccer*) secara *end-to-end*. Aplikasi ini menghadirkan pengalaman visual kelas dunia bertema **Athletic Obsidian & Neon Emerald**, menjembatani kebutuhan pemain dalam memesan jadwal pertandingan secara *real-time* sekaligus mempermudah manajemen arena dalam mengelola transaksi, inventaris, dan keuangan.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ✨ Fitur Utama
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 1. 🏟️ Landing Page Publik & Branding Atletik
+- **Hero Section Premium:** Desain modern dengan efek *mesh pitch*, status booking aktif, dan headline memikat.
+- **Pengecek Jadwal Real-Time (*Schedule Checker*):** Filter interaktif berbasis tanggal dan lapangan untuk melihat ketersediaan slot jam secara langsung tanpa perlu login.
+- **Katalog Lapangan & Matriks Tarif Transparan:** Rincian biaya berdasarkan kategori waktu (Siang Weekday, Malam Weekday, dan Weekend).
+- **Galeri HD & Fasilitas Stadion:** Menampilkan potret pencahayaan LED 1200 Lux, rumput sintetis monofilament standar FIFA, serta tribune & kafe lounge.
+- **Testimoni Pemain & FAQ Interaktif:** Informasi seputar aturan main, sistem refund, dan fasilitas pendukung.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. 👤 Portal Member / Pelanggan
+- **Alur Pemesanan Interaktif:** Integrasi pemilihan tanggal via kalender dinamis, durasi sewa fleksibel, dan validasi kode promo / voucher instan.
+- **Ringkasan Biaya Menempel (*Sticky Order Summary*):** Menampilkan rincian subtotal, potongan diskon, dan total tagihan secara transparan.
+- **Batas Waktu Pembayaran Otomatis:** Hitung mundur (*countdown timer*) 24 jam untuk pembayaran sebelum slot dibatalkan otomatis.
+- **Kemudahan Pembayaran:** Tombol *1-Click Copy* untuk nomor rekening bank (BCA, BNI) serta *drag-and-drop proof uploader* bukti transfer.
+- **E-Tiket & Bukti Booking:** Halaman cetak tiket pertandingan digital siap pakai lengkap dengan Barcode / QR Code.
 
-## Laravel Sponsors
+### 3. 🛡️ Panel Manajemen Admin
+- **Dasbor Analitik & KPI:** Statistik pendapatan total, transaksi aktif, jumlah pengguna, dan grafik Chart.js yang interaktif.
+- **Verifikasi Pembayaran Cepat:** Modal preview bukti transfer dengan aksi persetujuan (*Approve*) atau penolakan (*Reject*) satu klik.
+- **Manajemen Lapangan:** Pengaturan nama lapangan, deskripsi, harga per jam, dan upload foto arena.
+- **Manajemen Voucher:** Pembuatan kode diskon persentase maupun potongan nominal tetap beserta kuota dan masa berlaku.
+- **Inventaris Alat Olahraga:** Pelacakan stok perlengkapan lapangan (bola pertandingan, rompi tim, sarung tangan kiper, cone, dll).
+- **Pengumuman Berjalan (*Marquee Banner*):** Publikasi kabar operasional atau promo terbaru di bagian atas website.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🛠️ Tech Stack & Library
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+| Lapisan | Teknologi |
+| :--- | :--- |
+| **Backend Framework** | [Laravel 10](https://laravel.com/) (PHP ^8.1) |
+| **Authentication** | [Laravel Breeze](https://laravel.com/docs/10.x/starter-kits#laravel-breeze) |
+| **Database & ORM** | MySQL / MariaDB via Eloquent ORM |
+| **Styling & CSS** | [Tailwind CSS 3.x](https://tailwindcss.com/) dengan plugin `@tailwindcss/forms` |
+| **Typography** | Font Google [Outfit](https://fonts.google.com/specimen/Outfit) |
+| **Interactivity** | [Alpine.js](https://alpinejs.dev/) |
+| **Asset Bundler** | [Vite 5](https://vitejs.dev/) |
+| **Visual Chart** | [Chart.js](https://www.chartjs.org/) |
+| **Kalender** | [FullCalendar](https://fullcalendar.io/) |
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Panduan Instalasi & Menjalankan Aplikasi
 
-## Code of Conduct
+Ikuti langkah-langkah berikut untuk menjalankan proyek di lingkungan lokal:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. Clone Repository
+```bash
+git clone https://github.com/maaafiqs/minisoccer-reservation.git
+cd minisoccer-reservation
+```
 
-## Security Vulnerabilities
+### 2. Install Dependensi PHP & JavaScript
+```bash
+# Install PHP dependencies
+composer install
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Install NPM packages
+npm install
+```
 
-## License
+### 3. Salin Konfigurasi Lingkungan (.env)
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Konfigurasi Database
+Buka berkas `.env` dan sesuaikan pengaturan database Anda:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=reservasi_minisoccer
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 5. Migrasi & Seeder Database
+Jalankan migrasi tabel beserta data bawaan (seeder):
+```bash
+php artisan migrate --seed
+```
+
+### 6. Buat Storage Symlink
+Hubungkan direktori storage publik untuk gambar bukti pembayaran dan foto lapangan:
+```bash
+php artisan storage:link
+```
+
+### 7. Kompilasi Aset Frontend
+```bash
+# Untuk mode pengembangan (hot reload)
+npm run dev
+
+# ATAU kompilasi build produksi
+npm run build
+```
+
+### 8. Jalankan Web Server
+```bash
+php artisan serve
+```
+Akses aplikasi melalui peramban di: **`http://127.0.0.1:8000`** (atau via Laragon vhost: **`http://reservasi-minisoccer.test`**).
+
+---
+
+## 🔑 Akun Bawaan (Default Credentials)
+
+| Peran (Role) | Email | Password | Akses |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@admin.com` | `password` | Kelola reservasi, lapangan, keuangan, & inventaris |
+| **User / Pelanggan** | `sapik@gmail.com` | `password` | Booking jadwal, upload bukti bayar, cetak tiket |
+
+*(Catatan: Anda juga dapat mendaftarkan akun pelanggan baru secara langsung melalui halaman Register).*
+
+---
+
+## 📂 Struktur Direktori Utama
+
+```plaintext
+reservasi-minisoccer/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Admin/            # Controller panel admin (Field, Voucher, Inventory, dll)
+│   │   ├── Auth/             # Controller otentikasi (Login, Register, Password)
+│   │   └── ReservationController.php # Controller pemesanan & pembayaran
+│   ├── Models/               # Model Eloquent (Reservation, Field, Voucher, User, dll)
+│   └── Notifications/        # Notifikasi email & sistem status reservasi
+├── database/
+│   ├── migrations/           # Skema tabel database
+│   └── seeders/              # Data inisialisasi awal
+├── public/
+│   ├── images/               # Aset gambar stadion, rumput, pencahayaan & tribune HD
+│   └── build/                # Hasil build produksi Vite (CSS & JS)
+├── resources/
+│   ├── css/app.css           # Styling kustom, glassmorphism & utility tokens
+│   ├── js/app.js             # Alpine.js & integrasi modul frontend
+│   └── views/
+│       ├── admin/            # View halaman dashboard admin & verifikasi reservasi
+│       ├── auth/             # View halaman Login & Register
+│       ├── layouts/          # Layout Blade (App, Guest, Navigation)
+│       ├── reservations/     # View booking wizard, riwayat, pembayaran & print tiket
+│       └── home.blade.php    # Landing page publik premium
+├── routes/
+│   ├── web.php               # Rute aplikasi web
+│   └── auth.php              # Rute otentikasi
+└── tailwind.config.js        # Konfigurasi palet Athletic Neon Emerald & tipografi
+```
+
+---
+
+## 📄 Lisensi
+
+Proyek ini berada di bawah lisensi open-source [MIT License](LICENSE).
+Dikembangkan untuk menghadirkan pengalaman reservasi olahraga digital yang cepat, akurat, dan memanjakan mata.

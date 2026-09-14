@@ -1,130 +1,173 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-gray-800 leading-tight flex items-center">
-            <svg class="w-7 h-7 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-            {{ __('Pembayaran Reservasi') }}
-        </h2>
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('reservations.index') }}" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <div>
+                <h2 class="font-black text-2xl text-slate-900 tracking-tight">
+                    Pembayaran Reservasi
+                </h2>
+                <p class="text-xs text-slate-500">Selesaikan pembayaran untuk mengonfirmasi jadwal main tim Anda.</p>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl transform transition-all duration-300 hover:shadow-2xl">
-                <div class="p-8">
-                    
-                    <div class="text-center mb-8">
-                        <h3 class="text-3xl font-extrabold text-gray-900 mb-2">Selesaikan Pembayaran Anda</h3>
-                        <p class="text-gray-500">Nomor Reservasi: <span class="font-bold text-gray-800">{{ $reservation->reservation_number }}</span></p>
+    <div class="py-8 min-h-screen" x-data="{ copiedBca: false, copiedBni: false }">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            
+            <!-- Payment Deadline Alert Banner -->
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden"
+                 x-data="{ 
+                    deadline: new Date('{{ \Carbon\Carbon::parse($reservation->created_at)->addHours(24)->toIso8601String() }}').getTime(),
+                    timeLeft: 'Menghitung...',
+                    init() {
+                        setInterval(() => {
+                            let distance = this.deadline - new Date().getTime();
+                            if(distance < 0) { this.timeLeft = 'KADALUARSA'; return; }
+                            let h = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                            let m = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                            let s = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+                            this.timeLeft = h + ' : ' + m + ' : ' + s;
+                        }, 1000);
+                    }
+                 }">
+                <div>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-white/20 tracking-wider">
+                        BATAS WAKTU 24 JAM
+                    </span>
+                    <h3 class="text-lg font-black mt-1">Sisa Waktu Pembayaran</h3>
+                    <p class="text-xs text-amber-100">Batas akhir: {{ \Carbon\Carbon::parse($reservation->created_at)->addHours(24)->format('d M Y, H:i') }} WIB</p>
+                </div>
+                <div class="bg-slate-950/40 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 font-mono text-2xl sm:text-3xl font-black tracking-widest text-yellow-300">
+                    <span x-text="timeLeft"></span>
+                </div>
+            </div>
+
+            <!-- Invoice Summary Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-premium">
+                
+                <div class="flex justify-between items-center pb-6 border-b border-slate-100">
+                    <div>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Nomor Booking</span>
+                        <div class="text-xl font-black text-slate-900 font-mono">#{{ $reservation->reservation_number }}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Tagihan</span>
+                        <div class="text-2xl sm:text-3xl font-black text-brand-700">Rp {{ number_format($reservation->total_price, 0, ',', '.') }}</div>
+                    </div>
+                </div>
+
+                <!-- Match Details -->
+                <div class="py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-b border-slate-100">
+                    <div>
+                        <span class="text-slate-400 block">Lapangan</span>
+                        <span class="font-extrabold text-slate-800">{{ $reservation->field->name ?? 'Lapangan' }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Tanggal Main</span>
+                        <span class="font-bold text-slate-800">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Jam & Durasi</span>
+                        <span class="font-bold text-slate-800">{{ is_string($reservation->start_time) ? substr($reservation->start_time, 0, 5) : $reservation->start_time->format('H:i') }} WIB ({{ $reservation->duration }} Jam)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Status Pembayaran</span>
+                        <span class="inline-block font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-0.5">Menunggu Bukti</span>
+                    </div>
+                </div>
+
+                <!-- Bank Accounts for Transfer -->
+                <div class="pt-6">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-4">
+                        Transfer ke Rekening Resmi Maaafiqs:
+                    </h4>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <!-- BCA Card -->
+                        <div class="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 hover:border-blue-300 transition-colors relative">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-blue-600 text-white">BCA</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Bank Transfer</span>
+                            </div>
+                            <div class="font-mono text-xl font-black text-slate-900 tracking-wider mb-1">
+                                1234 5678 90
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">a.n. PT Maaafiqs Mini Soccer</p>
+                            <button type="button" @click="navigator.clipboard.writeText('1234567890'); copiedBca = true; setTimeout(() => copiedBca = false, 2000)"
+                                    class="w-full py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center"
+                                    :class="copiedBca ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'">
+                                <span x-text="copiedBca ? '✓ Berhasil Disalin!' : 'Salin Nomor Rekening'"></span>
+                            </button>
+                        </div>
+
+                        <!-- BNI Card -->
+                        <div class="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 hover:border-orange-300 transition-colors relative">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-orange-600 text-white">BNI</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Bank Transfer</span>
+                            </div>
+                            <div class="font-mono text-xl font-black text-slate-900 tracking-wider mb-1">
+                                0987 6543 21
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">a.n. PT Maaafiqs Mini Soccer</p>
+                            <button type="button" @click="navigator.clipboard.writeText('0987654321'); copiedBni = true; setTimeout(() => copiedBni = false, 2000)"
+                                    class="w-full py-2 rounded-xl text-xs font-bold border transition-colors flex items-center justify-center"
+                                    :class="copiedBni ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'">
+                                <span x-text="copiedBni ? '✓ Berhasil Disalin!' : 'Salin Nomor Rekening'"></span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100 shadow-inner">
-                        <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
-                            <span class="text-gray-600">Total Tagihan</span>
-                            <span class="text-3xl font-bold text-green-600">Rp {{ number_format($reservation->total_price, 0, ',', '.') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
-                            <span class="text-gray-600">Batas Waktu Pembayaran</span>
-                            <div class="text-right">
-                                <span class="text-lg font-bold text-red-600 block">{{ \Carbon\Carbon::parse($reservation->created_at)->addHours(24)->format('d M Y, H:i') }} WIB</span>
-                                <span class="text-sm font-mono font-bold bg-red-100 text-red-800 px-2 py-1 rounded"
-                                     x-data="{ 
-                                        deadline: new Date('{{ \Carbon\Carbon::parse($reservation->created_at)->addHours(24)->toIso8601String() }}').getTime(),
-                                        timeLeft: 'Menghitung...',
-                                        init() {
-                                            setInterval(() => {
-                                                let distance = this.deadline - new Date().getTime();
-                                                if(distance < 0) { this.timeLeft = 'KADALUARSA'; return; }
-                                                let h = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-                                                let m = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-                                                let s = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
-                                                this.timeLeft = h + ':' + m + ':' + s;
-                                            }, 1000);
-                                        }
-                                     }" x-text="timeLeft"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <h4 class="font-semibold text-gray-700">Transfer ke Rekening Berikut:</h4>
-                            
-                            <div class="flex items-center p-4 bg-white border border-blue-100 rounded-lg shadow-sm">
-                                <div class="bg-blue-100 text-blue-800 font-bold p-3 rounded-lg mr-4">BCA</div>
-                                <div>
-                                    <p class="font-mono text-xl tracking-wider text-gray-800">1234 5678 90</p>
-                                    <p class="text-sm text-gray-500">a.n. Maaafiqs Mini Soccer</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center p-4 bg-white border border-orange-100 rounded-lg shadow-sm">
-                                <div class="bg-orange-100 text-orange-800 font-bold p-3 rounded-lg mr-4">BNI</div>
-                                <div>
-                                    <p class="font-mono text-xl tracking-wider text-gray-800">0987 6543 21</p>
-                                    <p class="text-sm text-gray-500">a.n. Maaafiqs Mini Soccer</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if($errors->any())
-                        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md animate-pulse">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Terdapat kesalahan:</h3>
-                                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
-                                        @foreach($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
+                    <!-- Upload Proof Form -->
                     <form action="{{ route('reservations.pay', $reservation) }}" method="POST" enctype="multipart/form-data" x-data="{ fileName: '', filePreview: '' }">
                         @csrf
-                        
-                        <div class="mb-8">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer</label>
-                            
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-500 transition-colors duration-300 relative bg-gray-50">
-                                <div class="space-y-1 text-center" x-show="!filePreview">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600 justify-center">
-                                        <label for="payment_proof" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none px-2 py-1 shadow-sm border border-gray-200">
-                                            <span>Pilih File Gambar</span>
-                                            <input id="payment_proof" name="payment_proof" type="file" class="sr-only" accept="image/*" 
-                                                @change="fileName = $refs.file.files[0].name; const reader = new FileReader(); reader.onload = (e) => filePreview = e.target.result; reader.readAsDataURL($refs.file.files[0])" x-ref="file" required>
-                                        </label>
+
+                        <div class="mb-6">
+                            <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                                Unggah Bukti Transfer / Resi Pembayaran <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="p-6 border-2 border-dashed border-slate-300 rounded-3xl text-center hover:border-brand-500 bg-slate-50/50 transition-colors">
+                                <div x-show="!filePreview">
+                                    <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-3">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-2">PNG, JPG, JPEG hingga 2MB</p>
+                                    <p class="text-xs font-bold text-slate-700 mb-1">Klik untuk memilih file resi transfer</p>
+                                    <p class="text-[11px] text-slate-400 mb-3">Format JPG, PNG, atau JPEG (Maks. 2MB)</p>
+                                    <label for="payment_proof" class="cursor-pointer inline-flex items-center px-4 py-2 rounded-xl text-xs font-black text-white bg-slate-900 hover:bg-slate-800 shadow-sm">
+                                        Pilih Gambar
+                                        <input id="payment_proof" name="payment_proof" type="file" class="sr-only" accept="image/*" 
+                                               @change="fileName = $refs.file.files[0].name; const reader = new FileReader(); reader.onload = (e) => filePreview = e.target.result; reader.readAsDataURL($refs.file.files[0])" 
+                                               x-ref="file" required>
+                                    </label>
                                 </div>
-                                
-                                <div x-show="filePreview" class="text-center w-full" style="display: none;">
-                                    <img :src="filePreview" class="mx-auto h-48 object-contain rounded mb-3 shadow-sm border border-gray-200">
-                                    <p class="text-sm font-medium text-gray-700 mb-2" x-text="fileName"></p>
-                                    <button type="button" @click="filePreview = ''; fileName = ''; $refs.file.value = ''" class="text-sm text-red-500 hover:text-red-700 font-medium">Ganti Gambar</button>
+
+                                <div x-show="filePreview" style="display: none;" class="space-y-3">
+                                    <img :src="filePreview" class="mx-auto h-52 object-contain rounded-2xl shadow-sm border border-slate-200">
+                                    <p class="text-xs font-bold text-slate-700" x-text="fileName"></p>
+                                    <button type="button" @click="filePreview = ''; fileName = ''; $refs.file.value = ''" 
+                                            class="text-xs text-rose-600 hover:text-rose-700 font-bold underline">
+                                        Ganti Gambar
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex justify-end space-x-4">
-                            <a href="{{ route('reservations.index') }}" class="px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-all duration-300">
+                        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                            <a href="{{ route('reservations.index') }}" class="px-6 py-3 rounded-full text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors">
                                 Nanti Saja
                             </a>
-                            <button type="submit" class="px-8 py-3 border border-transparent shadow-lg text-base font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                Konfirmasi Pembayaran
+                            <button type="submit" class="btn-shimmer inline-flex items-center px-8 py-3.5 rounded-full font-black text-white bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 shadow-glow-green text-xs">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Kirim Bukti Transfer
                             </button>
                         </div>
                     </form>
 
                 </div>
+
             </div>
         </div>
     </div>

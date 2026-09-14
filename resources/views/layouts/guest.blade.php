@@ -24,7 +24,7 @@
         <div class="min-h-screen flex">
             <!-- Left Side (Image) -->
             <div class="hidden lg:flex lg:w-1/2 relative bg-green-600 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1518605368461-1e12a6fdb324?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Stadium" />
+                <img src="{{ asset('images/hero_pitch_night.jpg') }}" class="absolute inset-0 w-full h-full object-cover opacity-60" alt="Stadium" />
                 <div class="absolute inset-0 bg-gradient-to-t from-green-600/90 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-12 text-white z-10 w-full">
                     <h2 class="text-5xl font-extrabold mb-4 drop-shadow-lg">Maaafiqs Mini Soccer</h2>

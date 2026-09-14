@@ -1,198 +1,254 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Kelola Reservasi') }}
-        </h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <nav class="text-xs font-bold text-slate-400 mb-1 flex items-center space-x-2">
+                    <a href="{{ route('admin.dashboard') }}" class="hover:text-brand-600">Admin</a>
+                    <span>/</span>
+                    <span class="text-slate-700">Kelola Reservasi</span>
+                </nav>
+                <h2 class="font-black text-2xl text-slate-900 tracking-tight">
+                    Daftar Manajemen Reservasi
+                </h2>
+            </div>
+            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-full">
+                Total: {{ $reservations->total() }} Data
+            </span>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" x-data="{ selectedRes: null, showModal: false }">
+    <div class="py-8 min-h-screen" x-data="{ selectedRes: null, showModal: false, filterStatus: 'all' }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            
             @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                    <span class="block sm:inline">{{ session('success') }}</span>
+                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-2xl shadow-sm flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-xl bg-emerald-100 text-emerald-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span class="text-xs sm:text-sm font-black text-emerald-900">{{ session('success') }}</span>
+                    </div>
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
-                <div class="p-6 text-gray-900">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Reservasi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pemesan</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jadwal</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durasi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Voucher</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Harga</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($reservations as $res)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
-                                        {{ $res->reservation_number ?? '-' }}
-                                        @if($res->type === 'event')
-                                            <div class="mt-1">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-200 shadow-sm">
-                                                    Acara: {{ $res->event_name }}
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="font-medium text-gray-900">{{ $res->user->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $res->user->email }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($res->reservation_date)->format('d M Y') }}</div>
-                                        <div class="text-sm text-gray-500">{{ is_string($res->start_time) ? substr($res->start_time, 0, 5) : $res->start_time->format('H:i') }} WIB</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $res->duration }} Jam</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $res->voucher ? $res->voucher->code : '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        Rp {{ number_format($res->total_price, 0, ',', '.') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($res->status === 'pending')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-                                        @elseif($res->status === 'paid')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Lunas</span>
-                                        @elseif($res->status === 'accepted')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Reservasi Diterima</span>
-                                        @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Batal</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex flex-col space-y-2">
-                                            <button type="button" @click="selectedRes = JSON.parse($el.dataset.res); showModal = true" data-res="{{ json_encode($res) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs shadow-sm font-bold transition transform hover:scale-105">Kelola Reservasi</button>
-                                            
-                                            <form action="{{ route('admin.reservations.destroy', $res) }}" method="POST" class="inline-block w-full" onsubmit="return confirm('Hapus riwayat reservasi ini secara permanen?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full text-center bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-900 px-3 py-1.5 rounded text-xs transition shadow-sm font-bold">Hapus</button>
-                                            </form>
+            <!-- Quick Filter Tabs -->
+            <div class="flex flex-wrap gap-2 text-xs font-bold">
+                <button @click="filterStatus = 'all'" :class="filterStatus === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full transition-all">
+                    Semua
+                </button>
+                <button @click="filterStatus = 'pending'" :class="filterStatus === 'pending' ? 'bg-amber-500 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full transition-all">
+                    🟡 Pending
+                </button>
+                <button @click="filterStatus = 'paid'" :class="filterStatus === 'paid' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full transition-all">
+                    🔵 Sudah Bayar (Perlu Verifikasi)
+                </button>
+                <button @click="filterStatus = 'accepted'" :class="filterStatus === 'accepted' ? 'bg-brand-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full transition-all">
+                    🟢 Diterima
+                </button>
+                <button @click="filterStatus = 'cancelled'" :class="filterStatus === 'cancelled' ? 'bg-rose-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full transition-all">
+                    🔴 Batal
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[11px] font-black uppercase tracking-wider text-slate-400 bg-slate-50/70 border-b border-slate-100">
+                                <th class="px-6 py-4">No. Booking</th>
+                                <th class="px-6 py-4">Pemesan</th>
+                                <th class="px-6 py-4">Jadwal Main</th>
+                                <th class="px-6 py-4">Durasi</th>
+                                <th class="px-6 py-4">Promo</th>
+                                <th class="px-6 py-4">Total Biaya</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            @forelse($reservations as $res)
+                            <tr class="hover:bg-slate-50/60 transition-colors"
+                                x-show="filterStatus === 'all' || filterStatus === '{{ $res->status }}'">
+                                <td class="px-6 py-4">
+                                    <span class="font-mono font-bold text-slate-900">#{{ $res->reservation_number ?? '-' }}</span>
+                                    @if($res->type === 'event')
+                                        <div class="mt-1">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800">
+                                                Acara: {{ $res->event_name }}
+                                            </span>
                                         </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">Belum ada data reservasi.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">
-                        {{ $reservations->links() }}
-                    </div>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900">{{ $res->user->name }}</div>
+                                    <div class="text-[11px] text-slate-400">{{ $res->user->email }}</div>
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($res->reservation_date)->format('d M Y') }}</div>
+                                    <div class="text-[11px] text-slate-400">{{ is_string($res->start_time) ? substr($res->start_time, 0, 5) : $res->start_time->format('H:i') }} WIB</div>
+                                </td>
+
+                                <td class="px-6 py-4 font-bold">
+                                    {{ $res->duration }} Jam
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    @if($res->voucher)
+                                        <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-mono font-bold text-[10px]">
+                                            {{ $res->voucher->code }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-300">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4 font-black text-slate-900">
+                                    Rp {{ number_format($res->total_price, 0, ',', '.') }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    @if($res->status === 'pending')
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800">
+                                            Pending
+                                        </span>
+                                    @elseif($res->status === 'paid')
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800">
+                                            Sudah Bayar
+                                        </span>
+                                    @elseif($res->status === 'accepted')
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                                            Diterima
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800">
+                                            Batal
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <button type="button" @click="selectedRes = JSON.parse($el.dataset.res); showModal = true" data-res="{{ json_encode($res) }}" 
+                                                class="px-3.5 py-1.5 rounded-xl text-xs font-black text-white bg-slate-900 hover:bg-brand-600 shadow-sm transition-colors">
+                                            Kelola
+                                        </button>
+                                        
+                                        <form action="{{ route('admin.reservations.destroy', $res) }}" method="POST" onsubmit="return confirm('Hapus riwayat reservasi ini secara permanen?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Hapus Data">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="8" class="px-6 py-12 text-center text-xs text-slate-400">Belum ada data reservasi masuk.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Modal Kelola Reservasi (Flex Layout) -->
-                <template x-teleport="body">
-                    <div x-show="showModal" class="fixed inset-0 flex items-center justify-center p-4 sm:p-6" style="z-index: 9999; display: none;">
-                    <!-- Background overlay -->
-                    <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity" @click="showModal = false"></div>
+                <div class="p-4 border-t border-slate-100">
+                    {{ $reservations->links() }}
+                </div>
+            </div>
+
+            <!-- Modal Kelola & Verifikasi Bukti -->
+            <template x-teleport="body">
+                <div x-show="showModal" class="fixed inset-0 flex items-center justify-center p-4 sm:p-6" style="z-index: 9999; display: none;">
+                    <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" @click="showModal = false"></div>
                     
-                    <!-- Modal Panel -->
-                    <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="bg-white rounded-2xl text-left shadow-2xl transform transition-all w-full max-w-2xl flex flex-col max-h-[85vh] relative z-10 overflow-hidden">
+                    <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" 
+                         class="bg-white rounded-3xl text-left shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] relative z-10 overflow-hidden border border-slate-200">
                         
-                        <!-- Header (Sticky) -->
-                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center rounded-t-2xl bg-white shrink-0">
-                            <h3 class="text-xl font-black text-gray-900">Detail Reservasi</h3>
-                            <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-500 transition-colors focus:outline-none">
-                                <span class="sr-only">Tutup</span>
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                        <!-- Modal Header -->
+                        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Kelola Reservasi</h3>
+                                <p class="text-xs text-slate-400 font-mono" x-text="selectedRes ? '#' + selectedRes.reservation_number : ''"></p>
+                            </div>
+                            <button type="button" @click="showModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                         
-                        <!-- Body (Scrollable) -->
-                        <div class="p-6 overflow-y-auto flex-1">
+                        <!-- Modal Body -->
+                        <div class="p-6 overflow-y-auto flex-1 space-y-6">
                             <template x-if="selectedRes">
-                                <div class="grid grid-cols-2 gap-6">
-                                    <!-- Detail Pemesan -->
-                                    <div class="col-span-2 sm:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nama Pemesan</p>
-                                        <p class="font-bold text-gray-900 text-lg" x-text="selectedRes.user.name"></p>
-                                    </div>
-                                    <div class="col-span-2 sm:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Email Pemesan</p>
-                                        <p class="font-medium text-gray-900 text-base break-all" x-text="selectedRes.user.email"></p>
+                                <div class="space-y-6">
+                                    <!-- Customer Info -->
+                                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
+                                        <div>
+                                            <span class="text-slate-400 block mb-0.5">Nama Pemesan</span>
+                                            <span class="font-black text-slate-900 text-sm" x-text="selectedRes.user.name"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block mb-0.5">Email</span>
+                                            <span class="font-bold text-slate-700" x-text="selectedRes.user.email"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block mb-0.5">Jadwal Main</span>
+                                            <span class="font-bold text-slate-900" x-text="selectedRes.reservation_date + ' (' + selectedRes.start_time.substring(0,5) + ' WIB)'"></span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400 block mb-0.5">Total Tagihan</span>
+                                            <span class="font-black text-brand-700 text-sm" x-text="'Rp ' + parseInt(selectedRes.total_price).toLocaleString('id-ID')"></span>
+                                        </div>
                                     </div>
 
-                                    <!-- Keterangan Acara (Tampil jika type == event) -->
-                                    <template x-if="selectedRes.type === 'event'">
-                                        <div class="col-span-2 bg-purple-50 rounded-xl p-4 border border-purple-100 flex items-center shadow-sm">
-                                            <div class="mr-4 bg-purple-200 p-3 rounded-full text-purple-700">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Pemesanan Khusus Acara / Turnamen</p>
-                                                <p class="font-black text-purple-900 text-xl" x-text="selectedRes.event_name"></p>
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <div class="col-span-2 sm:col-span-1">
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Tanggal & Jam</p>
-                                        <p class="font-bold text-green-700 bg-green-50 inline-block px-3 py-1 rounded-lg border border-green-100" x-text="new Date(selectedRes.reservation_date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) + ' | ' + selectedRes.start_time.substring(0,5) + ' WIB'"></p>
-                                    </div>
-                                    <div class="col-span-2 sm:col-span-1">
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Tagihan <span x-show="selectedRes.voucher_id" class="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Pakai Voucher</span></p>
-                                        <p class="font-black text-gray-900 text-xl" x-text="'Rp ' + parseInt(selectedRes.total_price).toLocaleString('id-ID')"></p>
-                                        <p class="text-sm text-gray-500 font-medium mt-1" x-text="'(Durasi: ' + selectedRes.duration + ' Jam)'"></p>
-                                    </div>
-                                    
-                                    <!-- Payment Proof Image -->
-                                    <div class="col-span-2 mt-2" x-show="selectedRes.payment_proof">
-                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bukti Pembayaran</p>
-                                        <div class="bg-gray-100 rounded-xl p-2 border border-gray-200 flex justify-center">
-                                            <a :href="'/storage/' + selectedRes.payment_proof" target="_blank" class="block relative group cursor-pointer w-full text-center">
-                                                <img :src="'/storage/' + selectedRes.payment_proof" class="max-h-64 object-contain rounded-lg transition-opacity group-hover:opacity-90 mx-auto">
-                                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-lg">
-                                                    <span class="bg-white text-gray-900 font-bold text-sm px-4 py-2 rounded-full shadow-lg">Buka Gambar Penuh</span>
-                                                </div>
+                                    <!-- Proof of Payment Image -->
+                                    <div x-show="selectedRes.payment_proof" class="space-y-2">
+                                        <span class="text-xs font-black uppercase tracking-wider text-slate-400">Bukti Pembayaran Customer:</span>
+                                        <div class="bg-slate-900 p-3 rounded-2xl text-center">
+                                            <a :href="'/storage/' + selectedRes.payment_proof" target="_blank" class="block group relative">
+                                                <img :src="'/storage/' + selectedRes.payment_proof" class="max-h-72 object-contain rounded-xl mx-auto group-hover:opacity-90 transition-opacity">
+                                                <span class="inline-block mt-2 text-xs font-bold text-emerald-400 group-hover:underline">Buka Ukuran Penuh &nearr;</span>
                                             </a>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Form Update Status -->
-                                    <div class="col-span-2 mt-4 pt-6 border-t border-gray-100">
-                                        <form :action="'/admin/reservations/' + selectedRes.id + '/status'" method="POST" class="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
-                                            @csrf
-                                            @method('PATCH')
-                                            <label class="block text-sm font-black text-indigo-900 mb-3 uppercase tracking-wider">Ubah Status Reservasi</label>
-                                            <div class="flex flex-col sm:flex-row gap-3">
-                                                <select name="status" class="block w-full bg-white border-gray-300 text-gray-900 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-medium py-3" :value="selectedRes.status">
-                                                    <option value="pending">🟡 Pending (Menunggu Pembayaran)</option>
-                                                    <option value="paid">🔵 Lunas (Sudah Bayar, Menunggu Cek)</option>
-                                                    <option value="accepted">🟢 Terima Reservasi (Terkonfirmasi)</option>
-                                                    <option value="cancelled">🔴 Batal (Ditolak / Kedaluwarsa)</option>
-                                                </select>
-                                                <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-indigo-700 font-bold whitespace-nowrap transition-all duration-200 transform hover:-translate-y-0.5">Simpan</button>
-                                            </div>
-                                        </form>
+
+                                    <div x-show="!selectedRes.payment_proof" class="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-800 font-bold">
+                                        Customer belum mengunggah bukti pembayaran.
                                     </div>
+
+                                    <!-- Status Update Action -->
+                                    <form :action="'/admin/reservations/' + selectedRes.id + '/status'" method="POST" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+                                        @csrf
+                                        @method('PATCH')
+                                        <label class="block text-xs font-black uppercase tracking-wider text-slate-600">Perbarui Status Pemesanan</label>
+                                        <div class="flex flex-col sm:flex-row gap-3">
+                                            <select name="status" class="w-full rounded-xl border-slate-200 text-xs font-bold text-slate-800 py-3" :value="selectedRes.status">
+                                                <option value="pending">🟡 Pending (Menunggu Pembayaran)</option>
+                                                <option value="paid">🔵 Lunas (Sudah Bayar, Menunggu Cek)</option>
+                                                <option value="accepted">🟢 Diterima (Terkonfirmasi & Siap Main)</option>
+                                                <option value="cancelled">🔴 Batal (Ditolak / Kedaluwarsa)</option>
+                                            </select>
+                                            <button type="submit" class="btn-shimmer px-6 py-3 rounded-xl font-black text-xs text-white bg-brand-600 hover:bg-brand-500 shadow-md shrink-0">
+                                                Simpan Status
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </template>
                         </div>
                         
-                        <!-- Footer (Sticky) -->
-                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end rounded-b-2xl shrink-0">
-                            <button type="button" @click="showModal = false" class="w-full sm:w-auto inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-bold text-gray-700 hover:bg-gray-100 focus:outline-none transition-colors">Tutup Jendela</button>
+                        <!-- Modal Footer -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                            <button type="button" @click="showModal = false" class="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition-colors">
+                                Tutup
+                            </button>
                         </div>
-                        
                     </div>
                 </div>
-                </template>
+            </template>
 
-            </div>
         </div>
     </div>
 </x-app-layout>
