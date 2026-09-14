@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/migrate', function () {
     \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
