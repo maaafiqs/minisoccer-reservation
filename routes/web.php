@@ -17,7 +17,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservationController;
 
-use App\Http\Controllers\AdminController;
+Route::get('/migrate', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    $m = \Illuminate\Support\Facades\Artisan::output();
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    $s = \Illuminate\Support\Facades\Artisan::output();
+    return "<h1>Migrasi & Seed Berhasil!</h1><pre>{$m}\n{$s}</pre><br><a href='/'>Buka Halaman Utama</a>";
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
