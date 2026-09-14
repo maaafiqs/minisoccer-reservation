@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+    [x-cloak] {
+        display: none !important;
+    }
     body {
         @apply font-sans antialiased text-slate-900 bg-slate-50 selection:bg-brand-500 selection:text-white;
     }

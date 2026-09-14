@@ -105,41 +105,105 @@
                 </div>
 
                 <!-- Mobile Hamburger Toggle -->
-                <div class="flex items-center sm:hidden" x-data="{ mobileNav: false }">
-                    <button @click="mobileNav = !mobileNav" class="p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200">
+                <div class="flex items-center sm:hidden" x-data="{ mobileNav: false }" x-init="$watch('mobileNav', value => { document.body.style.overflow = value ? 'hidden' : '' })">
+                    <button @click="mobileNav = !mobileNav" type="button" aria-label="Menu Navigasi" class="p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
-                    <!-- Mobile Menu Overlay -->
-                    <div x-show="mobileNav" @click="mobileNav = false" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50"></div>
-                    <div x-show="mobileNav" x-transition class="fixed top-0 right-0 w-4/5 max-w-sm h-full bg-white z-50 shadow-2xl p-6 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center mb-8">
-                                <div class="flex items-center space-x-2">
-                                    <x-application-logo class="w-8 h-8" />
-                                    <span class="font-black text-lg">Maaafiqs</span>
+
+                    <!-- Teleport Mobile Menu to <body> so it escapes .glass-nav backdrop-filter containing block -->
+                    <template x-teleport="body">
+                        <div x-show="mobileNav" 
+                             x-cloak 
+                             @keydown.escape.window="mobileNav = false"
+                             class="fixed inset-0 z-[100] flex justify-end" 
+                             role="dialog" 
+                             aria-modal="true">
+                            
+                            <!-- Backdrop Overlay -->
+                            <div x-show="mobileNav" 
+                                 x-transition:enter="transition-opacity ease-linear duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition-opacity ease-linear duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 @click="mobileNav = false" 
+                                 class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"></div>
+
+                            <!-- Off-Canvas Slide Drawer -->
+                            <div x-show="mobileNav"
+                                 x-transition:enter="transform transition ease-out duration-300"
+                                 x-transition:enter-start="translate-x-full"
+                                 x-transition:enter-end="translate-x-0"
+                                 x-transition:leave="transform transition ease-in duration-200"
+                                 x-transition:leave-start="translate-x-0"
+                                 x-transition:leave-end="translate-x-full"
+                                 class="relative w-full max-w-xs sm:max-w-sm h-full min-h-screen bg-white shadow-2xl flex flex-col justify-between overflow-y-auto z-10">
+                                
+                                <div class="p-6">
+                                    <!-- Drawer Header -->
+                                    <div class="flex justify-between items-center pb-5 border-b border-slate-100 mb-6">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-9 h-9">
+                                                <x-application-logo class="w-full h-full drop-shadow-sm" />
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="font-black text-lg tracking-tight text-slate-900">Maaafiqs</span>
+                                                <span class="text-[9px] tracking-widest uppercase font-bold text-brand-600 -mt-1">Mini Soccer Arena</span>
+                                            </div>
+                                        </div>
+                                        <button @click="mobileNav = false" type="button" aria-label="Tutup Menu" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Navigation Links -->
+                                    <nav class="space-y-1.5 font-bold text-slate-700">
+                                        <a href="#cek-jadwal" @click="mobileNav = false" class="flex items-center space-x-3 py-3 px-3.5 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <span>Cek Jadwal</span>
+                                        </a>
+                                        <a href="#lapangan" @click="mobileNav = false" class="flex items-center space-x-3 py-3 px-3.5 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                            <span>Lapangan & Tarif</span>
+                                        </a>
+                                        <a href="#fasilitas" @click="mobileNav = false" class="flex items-center space-x-3 py-3 px-3.5 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                                            <span>Fasilitas</span>
+                                        </a>
+                                        <a href="#galeri" @click="mobileNav = false" class="flex items-center space-x-3 py-3 px-3.5 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <span>Galeri</span>
+                                        </a>
+                                        <a href="#faq" @click="mobileNav = false" class="flex items-center space-x-3 py-3 px-3.5 rounded-xl hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span>FAQ</span>
+                                        </a>
+                                    </nav>
                                 </div>
-                                <button @click="mobileNav = false" class="p-2 rounded-lg text-slate-400 hover:text-slate-600">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                </button>
-                            </div>
-                            <div class="space-y-3 font-bold text-slate-700">
-                                <a href="#cek-jadwal" @click="mobileNav = false" class="block py-2 px-3 rounded-lg hover:bg-slate-50">Cek Jadwal</a>
-                                <a href="#lapangan" @click="mobileNav = false" class="block py-2 px-3 rounded-lg hover:bg-slate-50">Lapangan & Tarif</a>
-                                <a href="#fasilitas" @click="mobileNav = false" class="block py-2 px-3 rounded-lg hover:bg-slate-50">Fasilitas</a>
-                                <a href="#galeri" @click="mobileNav = false" class="block py-2 px-3 rounded-lg hover:bg-slate-50">Galeri</a>
-                                <a href="#faq" @click="mobileNav = false" class="block py-2 px-3 rounded-lg hover:bg-slate-50">FAQ</a>
+
+                                <!-- Drawer Actions -->
+                                <div class="p-6 border-t border-slate-100 bg-slate-50 space-y-3">
+                                    @auth
+                                        @if(Auth::user()->role === 'admin')
+                                            <a href="{{ route('admin.dashboard') }}" class="block w-full text-center py-3 px-4 rounded-xl font-bold bg-white border border-slate-200 text-slate-800 shadow-sm hover:bg-slate-100 transition-all">Dashboard Admin</a>
+                                        @else
+                                            <a href="{{ route('dashboard') }}" class="block w-full text-center py-3 px-4 rounded-xl font-bold bg-white border border-slate-200 text-slate-800 shadow-sm hover:bg-slate-100 transition-all">Dashboard Saya</a>
+                                        @endif
+                                        <a href="{{ route('reservations.create') }}" class="btn-shimmer block w-full text-center py-3 px-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-brand-600 to-emerald-500 shadow-glow-green hover:from-brand-500 hover:to-emerald-400 transition-all">
+                                            Booking Sekarang
+                                        </a>
+                                    @else
+                                        <a href="{{ route('login') }}" class="block w-full text-center py-3 px-4 rounded-xl font-bold bg-white border border-slate-200 text-slate-800 shadow-sm hover:bg-slate-100 transition-all">Masuk Akun</a>
+                                        <a href="{{ route('register') }}" class="btn-shimmer block w-full text-center py-3 px-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-brand-600 to-emerald-500 shadow-glow-green hover:from-brand-500 hover:to-emerald-400 transition-all">
+                                            Daftar Sekarang
+                                        </a>
+                                    @endauth
+                                </div>
+
                             </div>
                         </div>
-                        <div class="pt-6 border-t border-slate-100 space-y-3">
-                            @auth
-                                <a href="{{ route('dashboard') }}" class="block w-full text-center py-3 rounded-xl font-bold bg-slate-100 text-slate-800">Buka Dashboard</a>
-                                <a href="{{ route('reservations.create') }}" class="block w-full text-center py-3 rounded-xl font-extrabold text-white bg-brand-600 shadow-md">Booking Sekarang</a>
-                            @else
-                                <a href="{{ route('login') }}" class="block w-full text-center py-3 rounded-xl font-bold bg-slate-100 text-slate-800">Masuk Akun</a>
-                                <a href="{{ route('register') }}" class="block w-full text-center py-3 rounded-xl font-extrabold text-white bg-brand-600 shadow-md">Daftar Sekarang</a>
-                            @endauth
-                        </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
