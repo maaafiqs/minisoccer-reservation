@@ -829,8 +829,8 @@
                             <span>Jl. Stadion Olahraga No. 1, Jakarta Selatan</span>
                         </li>
                         <li class="flex items-center">
-                            <span class="mr-2">💬</span>
-                            <span>WhatsApp: 0812-3456-7890</span>
+                            <span class="mr-2">📞</span>
+                            <span>No. Telp: 0777 3333 4444</span>
                         </li>
                         <li class="flex items-center">
                             <span class="mr-2">✉️</span>

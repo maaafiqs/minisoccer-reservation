@@ -172,7 +172,7 @@
         <div class="header">
             <div class="header-logo">
                 <h1>Maaafiqs Mini Soccer</h1>
-                <p>Jl. Olahraga No.1, Jakarta Selatan<br>Telp: 0812-3456-7890 | Email: cs@championarena.com</p>
+                <p>Jl. Stadion Olahraga No. 1, Jakarta Selatan<br>No. Telp: 0777 3333 4444 | Email: info@maaafiqsminisoccer.com</p>
             </div>
             <div class="header-info">
                 <h2>BUKTI RESERVASI</h2>
