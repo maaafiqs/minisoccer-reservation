@@ -11,11 +11,11 @@ class InventorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Bola' => InventoryCategory::create(['name' => 'Bola']),
-            'Rompi' => InventoryCategory::create(['name' => 'Rompi']),
-            'Alat Medis' => InventoryCategory::create(['name' => 'Alat Medis']),
-            'Perlengkapan Lapangan' => InventoryCategory::create(['name' => 'Perlengkapan Lapangan']),
-            'Kebersihan' => InventoryCategory::create(['name' => 'Kebersihan']),
+            'Bola' => InventoryCategory::firstOrCreate(['name' => 'Bola']),
+            'Rompi' => InventoryCategory::firstOrCreate(['name' => 'Rompi']),
+            'Alat Medis' => InventoryCategory::firstOrCreate(['name' => 'Alat Medis']),
+            'Perlengkapan Lapangan' => InventoryCategory::firstOrCreate(['name' => 'Perlengkapan Lapangan']),
+            'Kebersihan' => InventoryCategory::firstOrCreate(['name' => 'Kebersihan']),
         ];
 
         $items = [
@@ -46,15 +46,17 @@ class InventorySeeder extends Seeder
         ];
 
         foreach ($items as $item) {
-            InventoryItem::create([
-                'inventory_category_id' => $categories[$item['cat']]->id,
-                'item_code' => $item['code'],
-                'name' => $item['name'],
-                'brand' => $item['brand'],
-                'quantity' => $item['qty'],
-                'status' => $item['status'],
-                'description' => $item['desc']
-            ]);
+            InventoryItem::firstOrCreate(
+                ['item_code' => $item['code']],
+                [
+                    'inventory_category_id' => $categories[$item['cat']]->id,
+                    'name' => $item['name'],
+                    'brand' => $item['brand'],
+                    'quantity' => $item['qty'],
+                    'status' => $item['status'],
+                    'description' => $item['desc']
+                ]
+            );
         }
     }
 }
